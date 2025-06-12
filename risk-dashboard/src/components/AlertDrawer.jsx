@@ -1,47 +1,103 @@
 // src/components/AlertDrawer.jsx
-import React from "react";
-import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
 
-export default function AlertDrawer({ alert, onClose }) {
+import React, { useEffect, useState } from "react";
+import API from "../api/client";
+
+export default function AlertDrawer() {
+  const [alerts, setAlerts] = useState([]);
+  const [error, setError] = useState(null);
+
+  // Fetch the most recent alerts every 5s
+  useEffect(() => {
+    let isMounted = true; // for cleanup
+
+    async function fetchAlerts() {
+      try {
+        const resp = await API.get("/alerts/recent?limit=50");
+        if (isMounted) {
+          setAlerts(resp.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch alerts", err);
+        if (isMounted) {
+          setError(err);
+        }
+      }
+    }
+
+    fetchAlerts();
+    const intervalId = setInterval(fetchAlerts, 5000);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-500">
+        Error loading alerts: {error.message || "Unknown error"}
+      </div>
+    );
+  }
+
   return (
-    <Dialog.Root open={Boolean(alert)} onOpenChange={() => onClose(null)}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50" />
-        <Dialog.Content className="fixed top-0 right-0 w-full max-w-md h-full bg-gray-800 shadow-lg p-6 overflow-y-auto">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-white">Alert Details</h2>
-            <button onClick={onClose}>
-              <X className="text-gray-300 hover:text-white" />
-            </button>
-          </div>
-          {alert ? (
-            <>
-              <div className="mb-4">
-                <pre className="bg-gray-900 text-sm rounded p-2 overflow-x-auto">
-                  {JSON.stringify(alert, null, 2)}
-                </pre>
-              </div>
-              <div className="mb-4">
-                <h3 className="text-lg font-medium text-white mb-2">
-                  Explanation (LLM)
-                </h3>
-                <div className="bg-gray-900 rounded p-2 text-gray-300 italic">
-                  {/* Placeholder text; integrate your LLM endpoint later */}
-                  This is where the natural-language explanation will appear.
+    <div className="p-4">
+      <h2 className="text-lg font-semibold mb-2">Recent Alerts</h2>
+      {alerts.length === 0 ? (
+        <p>No alerts yet.</p>
+      ) : (
+        <ul className="space-y-4">
+          {alerts.map((a) => (
+            <li
+              key={a.id}
+              className="border border-gray-700 rounded-lg p-3 bg-gray-800"
+            >
+              {/* Top row: timestamp, signature, severity */}
+              <div className="flex justify-between items-center mb-2">
+                <div className="text-sm text-gray-400">
+                  {new Date(a.timestamp).toLocaleString()}
+                </div>
+                <div className="text-sm px-2 py-1 rounded bg-red-600 text-white">
+                  Severity: {a.severity}
                 </div>
               </div>
-              <div>
-                <button className="bg-sky-400 text-gray-900 rounded px-4 py-2 shadow hover:bg-sky-300">
-                  Copy JSON
-                </button>
+
+              {/* Signature */}
+              <div className="font-medium mb-1">{a.signature}</div>
+
+              {/* Source / Dest IPs */}
+              <div className="text-sm text-gray-300 mb-2">
+                {a.src_ip} → {a.dest_ip} ({a.proto})
               </div>
-            </>
-          ) : (
-            <div className="text-gray-400">No alert selected.</div>
-          )}
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+
+              {/* VT score + Explanation */}
+              <div className="flex flex-col space-y-1">
+                <div className="text-sm">
+                  <span className="font-semibold">VT Score:</span>{" "}
+                  <span
+                    className={
+                      a.vt_score >= 75
+                        ? "text-red-400"
+                        : a.vt_score >= 30
+                        ? "text-yellow-400"
+                        : "text-green-400"
+                    }
+                  >
+                    {a.vt_score.toFixed(1)}
+                  </span>
+                </div>
+                <div className="text-sm">
+                  <span className="font-semibold">Explanation:</span>{" "}
+                  <span className="italic text-gray-200">
+                    {a.explanation || "Loading..."}
+                  </span>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

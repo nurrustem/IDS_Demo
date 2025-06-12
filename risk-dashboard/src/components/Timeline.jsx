@@ -19,14 +19,15 @@ export default function Timeline({ alerts }) {
   const buckets = {};
   alerts.forEach((a) => {
     const dt = parseISO(a.timestamp);
-    // Round down to nearest 5 minutes
     const minutes = Math.floor(dt.getMinutes() / 5) * 5;
+
+    // remove the trailing "Z" so it's parsed as local time
     const bucketKey = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(
       2,
       "0"
     )}-${String(dt.getDate()).padStart(2, "0")}T${String(
       dt.getHours()
-    ).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00Z`;
+    ).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
 
     if (!buckets[bucketKey]) {
       buckets[bucketKey] = { count: 0, totalScore: 0 };

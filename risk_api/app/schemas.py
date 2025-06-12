@@ -4,38 +4,46 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
+
 class AlertCreate(BaseModel):
-    # timestamp: datetime
     src_ip: str
     dest_ip: str
     signature: str
     severity: int
     proto: Optional[str] = None
 
-class AlertResponse(AlertCreate):
-    id:        int
+
+class AlertResponse(BaseModel):
+    id: int
     timestamp: datetime
-    src_ip:    str
-    dest_ip:   str
+    src_ip: str
+    dest_ip: str
     signature: str
-    severity:  int
-    proto:     str
-    score:     float
+    severity: int
+    proto: str
+    score: float
+    vt_score: float
+    ml_score: float
+    explanation: Optional[str]
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class FeedbackCreate(BaseModel):
     alert_id: int
     is_true_positive: bool
 
-class FeedbackResponse(FeedbackCreate):
+
+class FeedbackResponse(BaseModel):
     id: int
+    alert_id: int
+    is_true_positive: bool
     timestamp: datetime
 
     class Config:
         orm_mode = True
+
 
 class RiskEntry(BaseModel):
     src_ip: str
@@ -45,7 +53,8 @@ class RiskEntry(BaseModel):
     combined_score: float
     count: int
 
+
 class WeightConfig(BaseModel):
     rule: float = 0.5
-    vt:   float = 0.25
-    ml:   float = 0.25
+    vt: float = 0.25
+    ml: float = 0.25

@@ -43,7 +43,7 @@ Below are all the steps needed to clone the **IDS_Demo** repository (with API in
    cd /home/ossec
    ```
 
-2. Clone from GitHub (replace with your actual repo URL if different):
+2. Clone from GitHub:
 
    ```bash
    git clone https://github.com/your-org/IDS_Demo.git

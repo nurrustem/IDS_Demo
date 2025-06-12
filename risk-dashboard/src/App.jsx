@@ -9,6 +9,7 @@ import AlertDrawer from "./components/AlertDrawer";
 import SimulationPanel from "./components/SimulationPanel";
 import SettingsPanel from "./components/SettingsPanel";
 import API from "./api/client";
+import TestIngestForm from "./components/TestIngestForm";
 
 function App() {
   const [alerts, setAlerts] = useState([]);
@@ -74,6 +75,7 @@ function App() {
             <RiskGauge score={kpis.precision * 100} />
             <SimulationPanel />
             <SettingsPanel />
+            <TestIngestForm />
           </div>
           <div className="lg:col-span-2 space-y-6">
             <Leaderboard
