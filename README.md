@@ -1,8 +1,5 @@
 # Installation Guide
 
-To see Linux Server Installation Guide, follow from line 4.
-To see Windows Machine Installation Guide, follow from line 319.
-
 # Linux Installation Guide
 
 Below are all the steps needed to clone the **IDS_Demo** repository (with API in `risk_api/` and front-end in `risk-dashboard/`), install dependencies, configure the database, and run both back-end and front-end on a Linux server.
