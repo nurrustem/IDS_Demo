@@ -7,7 +7,6 @@ export default function AlertDrawer() {
   const [alerts, setAlerts] = useState([]);
   const [error, setError] = useState(null);
 
-  // Fetch initial alerts
   const fetchAlerts = async () => {
     try {
       const resp = await API.get("/alerts/recent?limit=50");
@@ -19,64 +18,42 @@ export default function AlertDrawer() {
   };
 
   useEffect(() => {
-    let isMounted = true;
-
-    // 1) load existing alerts
+    // initial load
     fetchAlerts();
 
-    // 2) open WebSocket once
+    // listen for manual ingests
+    const onIngest = () => fetchAlerts();
+    window.addEventListener("alertIngested", onIngest);
+
+    // open WebSocket for ML updates & new alerts
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     const ws = new WebSocket(`${protocol}://${window.location.host}/ws/alerts`);
 
-    ws.onopen = () => {
-      console.log("WebSocket connected");
-    };
+    ws.onopen = () => console.log("WebSocket connected");
+    ws.onerror = (e) => console.error("WebSocket error", e);
+    ws.onclose = () => console.log("WebSocket disconnected");
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      // update only the matching alert
-      setAlerts((prev) =>
-        prev.map((a) =>
-          a.id === data.id
-            ? { ...a, ml_score: data.ml_score, explanation: data.explanation }
-            : a
-        )
-      );
-    };
 
-    ws.onerror = (e) => {
-      console.error("WebSocket error", e);
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket disconnected");
+      if (data.type === "new_alert") {
+        setAlerts((prev) => [data.alert, ...prev]);
+      } else {
+        setAlerts((prev) =>
+          prev.map((a) =>
+            a.id === data.id
+              ? { ...a, ml_score: data.ml_score, explanation: data.explanation }
+              : a
+          )
+        );
+      }
     };
 
     return () => {
-      isMounted = false;
+      window.removeEventListener("alertIngested", onIngest);
       ws.close();
     };
   }, []);
-
-  // Handler to send a test alert and refresh UI
-  const handleSendTest = async () => {
-    const payload = {
-      src_ip: "1.2.3.4",
-      dest_ip: "5.6.7.8",
-      signature: "TEST ALERT",
-      severity: 5,
-      proto: "TCP",
-    };
-    try {
-      await API.post("/ingest", payload);
-      // refresh rule-based data immediately
-      await fetchAlerts();
-      // ML score & explanation will come via WebSocket
-    } catch (err) {
-      console.error("Failed to send test alert", err);
-      setError(err);
-    }
-  };
 
   if (error) {
     return (
@@ -89,13 +66,6 @@ export default function AlertDrawer() {
   return (
     <div className="p-4">
       <h2 className="text-lg font-semibold mb-2">Recent Alerts</h2>
-
-      <button
-        onClick={handleSendTest}
-        className="mb-4 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-      >
-        Send Test Alert
-      </button>
 
       {alerts.length === 0 ? (
         <p>No alerts yet.</p>

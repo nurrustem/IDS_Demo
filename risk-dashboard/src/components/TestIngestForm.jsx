@@ -9,7 +9,7 @@ export default function TestIngestForm() {
   const [signature, setSignature] = useState("Manual Test Alert");
   const [severity, setSeverity] = useState(5);
   const [proto, setProto] = useState("TCP");
-  const [status, setStatus] = useState(""); // to show “Success” or error
+  const [status, setStatus] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -24,7 +24,8 @@ export default function TestIngestForm() {
       };
       const resp = await API.post("/ingest", payload);
       setStatus(`Alert ingested (ID: ${resp.data.id})`);
-      // Optionally, clear the form or leave it for another test
+      // trigger AlertDrawer to refresh
+      window.dispatchEvent(new Event("alertIngested"));
     } catch (err) {
       console.error(err);
       setStatus("Error ingesting alert");
@@ -32,9 +33,13 @@ export default function TestIngestForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-gray-900 rounded-lg">
-      <h3 className="text-md font-semibold mb-2">Manual Ingest</h3>
-      <div className="mb-2">
+    <form
+      onSubmit={handleSubmit}
+      className="p-4 bg-gray-900 rounded-lg space-y-2"
+    >
+      <h3 className="text-md font-semibold">Manual Ingest</h3>
+
+      <div>
         <label className="block text-sm">Source IP:</label>
         <input
           type="text"
@@ -43,7 +48,8 @@ export default function TestIngestForm() {
           className="w-full px-2 py-1 bg-gray-800 rounded"
         />
       </div>
-      <div className="mb-2">
+
+      <div>
         <label className="block text-sm">Dest IP:</label>
         <input
           type="text"
@@ -52,7 +58,8 @@ export default function TestIngestForm() {
           className="w-full px-2 py-1 bg-gray-800 rounded"
         />
       </div>
-      <div className="mb-2">
+
+      <div>
         <label className="block text-sm">Signature:</label>
         <input
           type="text"
@@ -61,7 +68,8 @@ export default function TestIngestForm() {
           className="w-full px-2 py-1 bg-gray-800 rounded"
         />
       </div>
-      <div className="mb-2 flex space-x-2">
+
+      <div className="flex space-x-2">
         <div className="flex-1">
           <label className="block text-sm">Severity (1–10):</label>
           <input
@@ -83,14 +91,14 @@ export default function TestIngestForm() {
           />
         </div>
       </div>
+
       <button
         type="submit"
-        className="
-    w-full bg-sky-400 text-black rounded px-4 py-2 shadow hover:bg-sky-300
-  "
+        className="w-full bg-sky-400 text-black rounded px-4 py-2 shadow hover:bg-sky-300"
       >
         Send Alert
       </button>
+
       {status && <p className="mt-2 text-sm text-gray-300">{status}</p>}
     </form>
   );

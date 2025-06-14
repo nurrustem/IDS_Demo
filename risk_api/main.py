@@ -196,6 +196,22 @@ async def ingest_alert(
         explanation=new_alert.explanation,
     )
 
+    await manager.broadcast({
+       "type": "new_alert",
+       "alert": {
+           "id":          new_alert.id,
+           "timestamp":   new_alert.timestamp.isoformat(),
+           "src_ip":      new_alert.src_ip,
+           "dest_ip":     new_alert.dest_ip,
+           "signature":   new_alert.signature,
+           "severity":    new_alert.severity,
+           "proto":       new_alert.proto,
+           "score":       new_alert.score,
+           "ml_score":    new_alert.ml_score,
+           "explanation": new_alert.explanation,
+       }
+    })
+
     # 4) Kick off background ML scoring
     payload = {
         "id": new_alert.id,
