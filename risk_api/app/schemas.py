@@ -20,7 +20,7 @@ class AlertResponse(BaseModel):
     dest_ip: str
     signature: str
     severity: int
-    proto: str
+    proto: Optional[str] = None
     score: float
     ml_score: float
     explanation: Optional[str]
