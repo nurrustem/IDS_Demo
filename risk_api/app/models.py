@@ -16,7 +16,7 @@ class Alert(Base):
     dest_ip = Column(String, nullable=False)
     signature = Column(String, nullable=False)
     severity = Column(Integer, nullable=False)
-    proto = Column(String, nullable=False)
+    proto = Column(String, nullable=True)
     score = Column(Float, nullable=False)
 
     # Changed to Float to match schemas (0.0–100.0)
