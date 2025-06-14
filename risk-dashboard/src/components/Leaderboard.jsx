@@ -14,13 +14,12 @@ export default function Leaderboard({ data, onSelectIp }) {
   // src/components/Leaderboard.jsx
   return (
     <div className="bg-gray-800 rounded-2xl shadow p-4 overflow-x-auto">
-      <div className="text-lg font-semibold text-white mb-4">Top Risky IPs</div>
+      <div className="text-lg font-semibold text-white mb-4">Alerts by IPs</div>
       <table className="min-w-full text-left text-sm">
         <thead>
           <tr className="text-gray-400">
             <th className="px-2 py-1">IP Address</th>
             <th className="px-2 py-1">Rule Avg</th>
-            <th className="px-2 py-1">VT Avg</th>
             <th className="px-2 py-1">ML Avg</th>
             <th className="px-2 py-1">Combined</th>
             <th className="px-2 py-1">Count</th>
@@ -32,7 +31,6 @@ export default function Leaderboard({ data, onSelectIp }) {
             <tr key={row.src_ip} className="hover:bg-gray-700 cursor-pointer">
               <td className="px-2 py-1">{row.src_ip}</td>
               <td className="px-2 py-1">{row.avg_rule_score.toFixed(1)}</td>
-              <td className="px-2 py-1">{row.avg_vt_score.toFixed(1)}</td>
               <td className="px-2 py-1">{row.avg_ml_score.toFixed(1)}</td>
               <td className="px-2 py-1">{row.combined_score.toFixed(1)}</td>
               <td className="px-2 py-1">{row.count}</td>

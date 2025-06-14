@@ -7,7 +7,6 @@ import Leaderboard from "./components/Leaderboard";
 import Timeline from "./components/Timeline";
 import AlertDrawer from "./components/AlertDrawer";
 import SimulationPanel from "./components/SimulationPanel";
-import SettingsPanel from "./components/SettingsPanel";
 import API from "./api/client";
 import TestIngestForm from "./components/TestIngestForm";
 
@@ -22,20 +21,10 @@ function App() {
   });
   const [selectedAlert, setSelectedAlert] = useState(null);
 
-  // Fetch KPIs
-  const fetchKpis = async () => {
-    try {
-      const resp = await API.get("/stats/kpi");
-      setKpis(resp.data);
-    } catch (e) {
-      console.error("Failed to fetch KPIs", e);
-    }
-  };
-
   // Fetch recent alerts
   const fetchAlerts = async () => {
     try {
-      const resp = await API.get("/alerts/recent?limit=50");
+      const resp = await API.get("/alerts/recent?limit=500");
       setAlerts(resp.data);
     } catch (e) {
       console.error("Failed to fetch alerts", e);
@@ -54,11 +43,9 @@ function App() {
 
   // Poll every 5 seconds
   useEffect(() => {
-    fetchKpis();
     fetchAlerts();
     fetchLeaderboard();
     const interval = setInterval(() => {
-      fetchKpis();
       fetchAlerts();
       fetchLeaderboard();
     }, 5000);
@@ -66,7 +53,7 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen w-full bg-gray-900 text-white">
       <Header />
       <div className="container mx-auto px-4 py-6 space-y-6">
         <KpiBar kpis={kpis} />
@@ -74,7 +61,6 @@ function App() {
           <div className="lg:col-span-1 space-y-6">
             <RiskGauge score={kpis.precision * 100} />
             <SimulationPanel />
-            <SettingsPanel />
             <TestIngestForm />
           </div>
           <div className="lg:col-span-2 space-y-6">

@@ -5,3 +5,5 @@ asyncpg
 psycopg2-binary
 pydantic
 httpx
+requests
+openai

@@ -43,7 +43,7 @@ Below are all the steps needed to clone the **IDS_Demo** repository (with API in
 2. Clone from GitHub:
 
    ```bash
-   git clone https://github.com/your-org/IDS_Demo.git
+   git clone https://github.com/nurrustem/IDS_Demo.git
    cd IDS_Demo
    ```
 
@@ -248,30 +248,56 @@ source ~/.bashrc
    On the Wazuh server (in a background tmux/screen session), run:
 
    ```bash
-   tail -F /var/ossec/logs/alerts/alerts.json \
-     | jq -c '{
-         timestamp: (.timestamp | sub("\\.\d+\+";"Z")),
-         src_ip: .data.srcip,
-         dest_ip: .data.dstip,
-         signature: .rule.description,
-         severity: .rule.level,
-         proto: .data.proto // "N/A",
-         vt_score: (
-           (.integration_output.virustotal // "")
-           | capture("(?<mal>\d+)/\d+")
-           | (.mal | tonumber // 0)
-           | if . == 0 then 0 elif . <= 4 then 50 else 100 end
-         )
-       }' \
-     | while read -r PAYLOAD; do
-         curl -s -X POST http://127.0.0.1:8000/ingest \
-              -H "Content-Type: application/json" \
-              --data-binary "$PAYLOAD" \
-              >/dev/null
-       done
+   #!/usr/bin/env bash
+   set -euo pipefail
    ```
 
-   - This ensures Suricata alerts (already ingested by Wazuh) flow into your API.
+# Path to the Wazuh alerts file (Suricata integration)
+
+LOG_FILE="/var/ossec/logs/alerts/alerts.json"
+
+# Your FastAPI ingest endpoint
+
+API_URL="http://127.0.0.1:8000/ingest"
+
+# Ensure jq is installed
+
+command -v jq >/dev/null 2>&1 || {
+echo "ERROR: jq is required but not installed." >&2
+exit 1
+}
+
+# Follow new lines, filter for Suricata alert events, map fields, then POST each
+
+tail -n0 -F "$LOG_FILE" \
+| jq --unbuffered -c '
+    select(
+      .location == "/var/log/suricata/eve.json" and
+      (.data.event_type // "") == "alert" and
+      (.data.src_ip      // "") != "" and
+      (.data.dest_ip     // "") != "" and
+      (.rule.description // "") != "" and
+      (.rule.level       // null)  != null and
+      (.data.proto       // "") != ""
+    )
+    | {
+        src_ip:    .data.src_ip,
+        dest_ip:   .data.dest_ip,
+        signature: .rule.description,
+        severity:  .rule.level,
+        proto:     .data.proto
+      }
+' \
+| while IFS= read -r PAYLOAD; do
+    curl -s -X POST "$API_URL" \
+ -H "Content-Type: application/json" \
+ --data-raw "$PAYLOAD" \
+ >/dev/null
+done
+
+````
+
+- This ensures Suricata alerts (already ingested by Wazuh) flow into your API.
 
 ---
 
@@ -281,9 +307,9 @@ To keep both API and front-end running after you log out, use `tmux` or `screen`
 
 - **API** (inside `risk_api/`):
 
-  ```bash
-  nohup bash -c "source venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8000" > /home/ossec/api.log 2>&1 &
-  ```
+```bash
+nohup bash -c "source venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8000" > /home/ossec/api.log 2>&1 &
+````
 
 - **Front-end** (inside `risk-dashboard/` if using `serve`):
 

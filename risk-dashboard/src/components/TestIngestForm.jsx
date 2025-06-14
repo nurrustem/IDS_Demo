@@ -85,7 +85,9 @@ export default function TestIngestForm() {
       </div>
       <button
         type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-1 rounded mt-2"
+        className="
+    w-full bg-sky-400 text-black rounded px-4 py-2 shadow hover:bg-sky-300
+  "
       >
         Send Alert
       </button>

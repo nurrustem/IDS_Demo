@@ -40,7 +40,7 @@ export default function SimulationPanel() {
       </select>
       <button
         onClick={handleRun}
-        className="w-full bg-sky-400 text-white rounded px-4 py-2 shadow hover:bg-sky-300"
+        className="w-full bg-sky-400 text-black rounded px-4 py-2 shadow hover:bg-sky-300"
       >
         Run
       </button>
