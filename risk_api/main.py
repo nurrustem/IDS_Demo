@@ -174,6 +174,8 @@ async def ingest_alert(
             alert_row.proto == new_alert.proto and
             alert_row.score == new_alert.score
         ):
+            while background_tasks.tasks:
+                await background_tasks.tasks[0]
             new_alert.ml_score = alert_row.ml_score
             new_alert.explanation = alert_row.explanation
             dupe = True
