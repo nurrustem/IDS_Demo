@@ -58,7 +58,6 @@ function App() {
                 setSelectedAlert(a);
               }}
             />
-            <TestIngestForm />
           </div>
           <div className="lg:col-span-2 space-y-6">
             <Timeline alerts={alerts} />

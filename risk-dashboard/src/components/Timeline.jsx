@@ -10,12 +10,16 @@ import {
   Bar,
   Area,
 } from "recharts";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, subMinutes } from "date-fns";
 
 export default function Timeline({ alerts }) {
-  // aggregate alerts into 5-minute buckets
+  // Only include alerts from the last 20 minutes
+  const cutoff = subMinutes(new Date(), 20);
+  const recentAlerts = alerts.filter((a) => parseISO(a.timestamp) >= cutoff);
+
+  // aggregate recentAlerts into 5-minute buckets
   const buckets = {};
-  alerts.forEach((a) => {
+  recentAlerts.forEach((a) => {
     const dt = parseISO(a.timestamp);
     const minutes = Math.floor(dt.getMinutes() / 5) * 5;
     const bucketKey = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(
@@ -44,7 +48,7 @@ export default function Timeline({ alerts }) {
   return (
     <div className="bg-gray-800 rounded-2xl shadow p-4">
       <div className="text-lg font-semibold text-white mb-4">
-        Alerts Over Time
+        Alerts Over Time (Last 20 Minutes)
       </div>
       <div style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer>

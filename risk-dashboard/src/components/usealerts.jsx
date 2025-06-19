@@ -10,7 +10,7 @@ export default function usealerts() {
       .then((r) => setAlerts(r.data))
       .catch((e) => console.error("fetchAlerts error", e));
 
-    const wsUrl = "ws://10.3.3.200:8000/ws/alerts"; // ← full URL
+    const wsUrl = "ws://localhost:8000/ws/alerts"; // ← full URL
     console.log("📡 connecting to WebSocket at", wsUrl);
 
     const ws = new WebSocket(wsUrl);
