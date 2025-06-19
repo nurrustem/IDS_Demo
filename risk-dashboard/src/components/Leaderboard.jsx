@@ -23,7 +23,6 @@ export default function Leaderboard({ data, onSelectIp }) {
             <th className="px-2 py-1">ML Avg</th>
             <th className="px-2 py-1">Combined</th>
             <th className="px-2 py-1">Count</th>
-            <th className="px-2 py-1">Trend</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-700">
@@ -34,9 +33,6 @@ export default function Leaderboard({ data, onSelectIp }) {
               <td className="px-2 py-1">{row.avg_ml_score.toFixed(1)}</td>
               <td className="px-2 py-1">{row.combined_score.toFixed(1)}</td>
               <td className="px-2 py-1">{row.count}</td>
-              <td className="px-2 py-1 w-40 h-14">
-                {/* Sparkline code unchanged */}
-              </td>
             </tr>
           ))}
         </tbody>
