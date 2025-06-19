@@ -23,9 +23,19 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="bg-gray-800 shadow p-4 flex items-center justify-between">
-      <div className="text-2xl font-bold">IDS Demo Dashboard</div>
-      <div className="flex items-center space-x-2">
+    <header className="bg-gray-800 shadow p-4 grid grid-cols-3 items-center">
+      {/* Empty left cell */}
+      <div />
+
+      {/* Centered title */}
+      <div className="text-center">
+        <span className="text-2xl font-bold text-white">
+          IDS DEMO DASHBOARD
+        </span>
+      </div>
+
+      {/* Right-aligned connectivity status */}
+      <div className="flex items-center justify-end space-x-2">
         {online ? (
           <Wifi className="text-green-400" />
         ) : (

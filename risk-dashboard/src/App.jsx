@@ -50,7 +50,7 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 space-y-6">
             <KpiBar kpis={kpis} />
-            <RiskGauge score={kpis.precision * 100} />
+            <RiskGauge alerts={alerts} />
             <Leaderboard
               data={leaderboard}
               onSelectIp={(ip) => {

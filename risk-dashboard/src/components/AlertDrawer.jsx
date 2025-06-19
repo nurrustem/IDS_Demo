@@ -7,7 +7,7 @@ export default function AlertDrawer({ alerts, selectedAlert, onClose }) {
   }
 
   return (
-    <div className="p-4">
+    <div className="w-full">
       <div className="flex justify-between items-center mb-2">
         <h2 className="text-lg font-semibold">Recent Alerts</h2>
         {selectedAlert && (
@@ -23,7 +23,7 @@ export default function AlertDrawer({ alerts, selectedAlert, onClose }) {
       {alerts.length === 0 ? (
         <p>No alerts yet.</p>
       ) : (
-        <div className="max-h-80 overflow-y-auto border border-gray-700 rounded-lg">
+        <div className="w-full h-96 overflow-y-auto border border-gray-700 rounded-lg">
           <ul className="divide-y divide-gray-600">
             {alerts.map((a) => {
               const isSelected = selectedAlert?.id === a.id;
