@@ -166,20 +166,24 @@ async def ingest_alert(
     )
 
     for alert_row in recent_alerts.scalars():
+        # match all the identifying fields *and* the rule score…
         if (
-            alert_row.src_ip == new_alert.src_ip and
-            alert_row.dest_ip == new_alert.dest_ip and
+            alert_row.src_ip    == new_alert.src_ip  and
+            alert_row.dest_ip   == new_alert.dest_ip and
             alert_row.signature == new_alert.signature and
-            alert_row.severity == new_alert.severity and
-            alert_row.proto == new_alert.proto and
-            alert_row.score == new_alert.score
+            alert_row.severity  == new_alert.severity and
+            alert_row.proto     == new_alert.proto    and
+            alert_row.score     == new_alert.score
         ):
-            while background_tasks.tasks:
-                await background_tasks.tasks[0]
-            new_alert.ml_score = alert_row.ml_score
-            new_alert.explanation = alert_row.explanation
-            dupe = True
-            break
+            # …but if that score is zero in both old and new, we do NOT want to reuse it:
+            if not (alert_row.score == 0 and new_alert.score == 0):
+                # it really is a duplicate with a non-zero score—reuse ML score + explanation
+                while background_tasks.tasks:
+                    await background_tasks.tasks[0]
+                new_alert.ml_score    = alert_row.ml_score
+                new_alert.explanation = alert_row.explanation
+                dupe = True
+                break
     db.add(new_alert)
     await db.commit()
     await db.refresh(new_alert)
