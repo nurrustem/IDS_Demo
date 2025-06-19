@@ -10,17 +10,24 @@ import {
   Bar,
   Area,
 } from "recharts";
-import { format, parseISO, subMinutes } from "date-fns";
+import { format, parseISO, subMinutes, addHours } from "date-fns";
 
 export default function Timeline({ alerts }) {
-  // Only include alerts from the last 20 minutes
+  // Fix timestamps that are 2 hours behind by adding 2 hours,
+  // then only include those within the last 20 minutes
   const cutoff = subMinutes(new Date(), 20);
-  const recentAlerts = alerts.filter((a) => parseISO(a.timestamp) >= cutoff);
+  const recentAlerts = alerts
+    .map((a) => {
+      const original = parseISO(a.timestamp);
+      const corrected = addHours(original, 2);
+      return { ...a, _dt: corrected };
+    })
+    .filter((a) => a._dt >= cutoff);
 
-  // aggregate recentAlerts into 5-minute buckets
+  // Aggregate into 5-minute buckets
   const buckets = {};
   recentAlerts.forEach((a) => {
-    const dt = parseISO(a.timestamp);
+    const dt = a._dt;
     const minutes = Math.floor(dt.getMinutes() / 5) * 5;
     const bucketKey = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(
       2,
@@ -36,7 +43,7 @@ export default function Timeline({ alerts }) {
     buckets[bucketKey].totalScore += a.score;
   });
 
-  // build sorted data array with average score
+  // Build sorted data array with average score
   const data = Object.entries(buckets)
     .map(([time, { count, totalScore }]) => ({
       time,
