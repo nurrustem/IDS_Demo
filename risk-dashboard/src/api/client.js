@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:8000", // point to your FastAPI during dev
+  baseURL: "http://10.3.3.200:8000", // point to your FastAPI during dev
   timeout: 5000,
 });
 
